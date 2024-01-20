@@ -8,7 +8,7 @@
 
 <h1>DAFTAR BUKU</h1>
 
-<div id="daftarBuku"></div>
+<div id="daftarBuku"></div> 
 
 <script>
     // BUKU TAMPIL
@@ -60,7 +60,7 @@
                     // Jika sukses, arahkan pengguna ke halaman detail buku
                     window.location.href = `detail-buku?id=${id}`;
                 } else {
-                    console.error(data.msg);
+                    console.error(data.msg);    
                 }
             })
             .catch(error => console.error('Error:', error));

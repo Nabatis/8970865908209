@@ -45,6 +45,7 @@ Route::get('searchBuku', [BukuController::class, 'search']);
 Route::post('reviews', [ReviewController::class, 'store']);
 Route::delete('deleteReviews/{id}', [ReviewController::class, 'destroy']);
 Route::get('total-rating/{id_buku}', [ReviewController::class, 'getTotalRating']);
+Route::get('total-rating-all-book', [ReviewController::class, 'getTotalRatingAllBook']);
 Route::get('getReviews', [ReviewController::class, 'getUlasan']);
 Route::post('bookmark/add', [BookmarkController::class, 'addToBookmark']);
 Route::delete('unbookmark', [BookmarkController::class, 'unbookmark']);

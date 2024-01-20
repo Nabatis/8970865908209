@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Buku;
 use Illuminate\Http\Request;
 use App\Models\Peminjaman;
+use App\Models\Ulasan;
 use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
@@ -54,17 +55,70 @@ class BukuController extends Controller
         ]);
     }
 
+    public function getTotalRatingAllBook()
+    {
+        // Get all books
+        $books = Buku::all();
+
+        // Check if there are any books
+        if ($books->isEmpty()) {
+            return response()->json(['success' => false, 'message' => 'No books found'], 404);
+        }
+
+        $totalRatings = [];
+
+        // Loop through each book to calculate total rating
+        foreach ($books as $book) {
+            $totalRating = Ulasan::where('id_buku', $book->id)->avg('rating');
+
+            $formattedRating = number_format($totalRating, 1, '.', '');
+
+            $totalRatings[] = [
+                'book_id' => $book->id,
+                'total_rating' => $formattedRating,
+            ];
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Total ratings for all books retrieved successfully',
+            'total_ratings' => $totalRatings,
+        ], 200);
+    }
+
     public function getBuku()
     {
-
+        // Get all books
         $buku = Buku::all();
 
-        if (!$buku) {
+        if ($buku->isEmpty()) {
             return response()->json(['success' => false, 'msg' => 'Buku tidak ditemukan'], 404);
         }
 
-        return response()->json(['success' => true, 'msg' => 'Detail Buku', 'data' => $buku]);
+        // Get total ratings for all books
+        $totalRatingsResponse = $this->getTotalRatingAllBook();
+
+        // Check if total ratings retrieval was successful
+        if ($totalRatingsResponse->getStatusCode() == 200) {
+            $totalRatingsData = json_decode($totalRatingsResponse->getContent(), true);
+            $totalRatings = $totalRatingsData['total_ratings'];
+        } else {
+            // If there's an error in getting total ratings, set it to an empty array
+            $totalRatings = [];
+        }
+
+        // Merge total ratings with the book data
+        foreach ($buku as $key => $book) {
+            $buku[$key]['total_rating'] = $totalRatings[$key]['total_rating'] ?? null;
+        }
+
+        return response()->json([
+            'success' => true,
+            'msg' => 'Detail Buku',
+            'data' => $buku,
+        ]);
     }
+
 
     public function detailBuku($id)
     {

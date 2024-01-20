@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\DB;
 
 use Illuminate\Http\Request;
 use App\Models\Ulasan;
+use App\Models\Buku;
 
 class ReviewController extends Controller
 {
@@ -64,6 +65,7 @@ class ReviewController extends Controller
             'total_rating' => $totalRating,
         ], 200);
     }
+
 
     public function destroy($id)
     {
