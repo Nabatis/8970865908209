@@ -53,7 +53,7 @@
         <label for="rating">Rating:</label>
         <input type="number" id="rating" name="rating" min="1" max="5" required>
 
-        <label for="ulasan">Review:</label>
+        <label for="ulasan">Review:</label> 
         <textarea id="ulasan" name="ulasan" rows="4"></textarea>
 
         <button type="button" onclick="submitReview()">Submit Review</button>

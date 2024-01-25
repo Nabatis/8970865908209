@@ -57,7 +57,7 @@ class KategoriController extends Controller
         return response()->json(['msg' => 'Kategori updated successfully', 'data' => $kategori], 200);
     }
 
-    public function destroy($id)
+    public function deleteKategori($id)
     {
         $kategori = Kategori::find($id);
 

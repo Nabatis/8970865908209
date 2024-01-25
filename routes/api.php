@@ -36,24 +36,35 @@ Route::group(['middleware' => 'api', 'prefix' => 'auth'], function ($router) {
     Route::put('users/{id}/ban', [AuthController::class, 'banUser']);
 });
 
+// ADMIN
+// buku
+Route::post('editBuku/{id}', [BukuController::class, 'editBuku']);
+Route::post('tambahBuku', [BukuController::class, 'tambahBuku']);
+Route::delete('deleteBuku/{id}', [BukuController::class, 'deleteBuku']);
+Route::put('tambah-stok-buku/{id}', [BukuController::class, 'tambahStokBuku']);
+Route::post('updateStatus/{id}', [BukuController::class, 'updateStatus']);
+Route::post('tambahKategori', [KategoriController::class, 'store']);
+Route::delete('deleteKategori/{id}', [KategoriController::class, 'deleteKategori']);
+
+// dll
+Route::delete('deleteReviews/{id}', [ReviewController::class, 'destroy']);
+Route::get('searchUser/{name}', [DeviceController::class, 'searchUser']);
+Route::delete('deleteUser/{id}', [DeviceController::class, 'deleteUser']);
+
+
+// USER
 Route::post('peminjaman', [BukuController::class, 'pinjamBuku']);
 Route::get('dataBuku', [BukuController::class, 'getBuku']);
+Route::get('dataBukuPopuler', [BukuController::class, 'getBukuHighRating']);
 Route::get('detailBuku/{id}', [BukuController::class, 'detailBuku']);
-Route::post('tambahBuku', [BukuController::class, 'tambahBuku']);
-Route::post('editBuku/{id}', [BukuController::class, 'editBuku']);
 Route::get('searchBuku', [BukuController::class, 'search']);
 Route::post('reviews', [ReviewController::class, 'store']);
-Route::delete('deleteReviews/{id}', [ReviewController::class, 'destroy']);
 Route::get('total-rating/{id_buku}', [ReviewController::class, 'getTotalRating']);
-Route::get('total-rating-all-book', [ReviewController::class, 'getTotalRatingAllBook']);
+Route::get('total-rating-all-book', [BukuController::class, 'getTotalRatingAllBook']);
 Route::get('getReviews', [ReviewController::class, 'getUlasan']);
+Route::get('getReviews/{bookId}', [ReviewController::class, 'getUlasanByBookId']);
 Route::post('bookmark/add', [BookmarkController::class, 'addToBookmark']);
 Route::delete('unbookmark', [BookmarkController::class, 'unbookmark']);
-Route::post('updateStatus/{id}', [BukuController::class, 'updateStatus']);
-Route::put('tambah-stok-buku/{id}', [BukuController::class, 'tambahStokBuku']);
 
-Route::post('tambahKategori', [KategoriController::class, 'store']);
 Route::get('dataKategori/{id}', [KategoriController::class, 'show']);
-
-
-Route::get('searchUser/{name}', [DeviceController::class, 'searchUser']);
+Route::get('dataKategori', [KategoriController::class, 'index']);

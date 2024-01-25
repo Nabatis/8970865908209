@@ -48,6 +48,17 @@ class ReviewController extends Controller
         ], 200);
     }
 
+    public function getUlasanByBookId($bookId)
+    {
+        $ulasan = Ulasan::with('user')->where('id_buku', $bookId)->get();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Ulasan berhasil diambil',
+            'ulasans' => $ulasan,
+        ], 200);
+    }
+
     public function getTotalRating($id_buku)
     {
         // Validate the book ID
@@ -57,7 +68,9 @@ class ReviewController extends Controller
         }
 
         // Calculate the total rating for the book
-        $totalRating = Ulasan::where('id_buku', $id_buku)->avg('rating');
+        $totalRating = Ulasan::where('id_buku', $id_buku)
+            ->orderBy('created_at', 'desc')
+            ->avg('rating');
 
         return response()->json([
             'success' => true,

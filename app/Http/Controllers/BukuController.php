@@ -35,6 +35,17 @@ class BukuController extends Controller
             return response()->json(['success' => false, 'msg' => 'Buku tidak ditemukan'], 404);
         }
 
+        // Validasi apakah buku sedang dipinjam oleh pengguna yang sama
+        $existingPeminjaman = Peminjaman::where('id_buku', $request->id_buku)
+            ->where('id_users', $request->id_users)
+            ->where('status_peminjaman', '!=', 'dikembalikan')
+            ->first();
+
+        if ($existingPeminjaman) {
+            return response()->json(['success' => false, 'msg' => 'Anda sudah meminjam buku ini dan belum mengembalikannya'], 400);
+        }
+
+        // Membuat peminjaman baru
         $peminjaman = Peminjaman::create([
             'id_buku' => $request->id_buku,
             'id_users' => $request->id_users,
@@ -43,7 +54,7 @@ class BukuController extends Controller
             'status_peminjaman' => 'tertunda',
         ]);
 
-        // Update book stock if the borrowing is approved
+        // Update stok buku jika peminjaman disetujui
         if ($peminjaman->status_peminjaman === 'disetujui') {
             $buku->decrement('stock');
         }
@@ -58,7 +69,7 @@ class BukuController extends Controller
     public function getTotalRatingAllBook()
     {
         // Get all books
-        $books = Buku::all();
+        $books = Buku::orderBy('created_at', 'desc')->get();
 
         // Check if there are any books
         if ($books->isEmpty()) {
@@ -88,8 +99,7 @@ class BukuController extends Controller
 
     public function getBuku()
     {
-        // Get all books
-        $buku = Buku::all();
+        $buku = Buku::orderBy('created_at', 'desc')->get();
 
         if ($buku->isEmpty()) {
             return response()->json(['success' => false, 'msg' => 'Buku tidak ditemukan'], 404);
@@ -118,6 +128,54 @@ class BukuController extends Controller
             'data' => $buku,
         ]);
     }
+
+    public function getBukuHighRating()
+    {
+        // Dapatkan buku yang diurutkan berdasarkan tanggal pembuatan
+        $buku = Buku::orderBy('created_at', 'desc')->get();
+
+        if ($buku->isEmpty()) {
+            return response()->json(['success' => false, 'msg' => 'Buku tidak ditemukan'], 404);
+        }
+
+        // Dapatkan total rating untuk semua buku
+        $totalRatingsResponse = $this->getTotalRatingAllBook();
+
+        // Periksa apakah pengambilan total rating berhasil
+        if ($totalRatingsResponse->getStatusCode() == 200) {
+            $totalRatingsData = json_decode($totalRatingsResponse->getContent(), true);
+            $totalRatings = $totalRatingsData['total_ratings'];
+        } else {
+            // Jika ada kesalahan dalam mendapatkan total rating, atur menjadi array kosong
+            $totalRatings = [];
+        }
+
+        // Gabungkan buku dengan total rating
+        $bukuDenganTotalRating = [];
+        foreach ($buku as $key => $book) {
+            $totalRating = $totalRatings[$key]['total_rating'] ?? null;
+            $bukuDenganTotalRating[] = [
+                'id' => $book->id,
+                'cover_buku' => $book->cover_buku,
+                'judul' => $book->judul,
+                'penulis' => $book->penulis,
+                'tanggal_pembuatan' => $book->created_at,
+                'total_rating' => $totalRating,
+            ];
+        }
+
+        // Urutkan buku berdasarkan total rating secara menurun
+        usort($bukuDenganTotalRating, function ($a, $b) {
+            return $b['total_rating'] <=> $a['total_rating'];
+        });
+
+        return response()->json([
+            'success' => true,
+            'msg' => 'Detail Buku',
+            'data' => $bukuDenganTotalRating,
+        ]);
+    }
+
 
 
     public function detailBuku($id)
@@ -182,11 +240,11 @@ class BukuController extends Controller
         }
 
         $rules = [
-            'judul' => 'required|string|max:255',
-            'penulis' => 'required|string|max:255',
-            'penerbit' => 'required|string|max:255',
-            'deskripsi' => 'required',
-            'tahun_terbit' => 'required',
+            'judul' => 'string|max:255',
+            'penulis' => 'string|max:255',
+            'penerbit' => 'string|max:255',
+            'deskripsi' => '',
+            'tahun_terbit' => '',
             'cover_buku' => 'image|mimes:jpeg,png,jpg'
         ];
 
@@ -206,6 +264,7 @@ class BukuController extends Controller
         $dataBuku->penerbit = $request->input('penerbit');
         $dataBuku->deskripsi = $request->input('deskripsi');
         $dataBuku->tahun_terbit = $request->input('tahun_terbit');
+        $dataBuku->id_kategori = $request->input('id_kategori');
 
         // Update cover image if provided
         if ($request->hasFile('cover_buku')) {
@@ -310,5 +369,21 @@ class BukuController extends Controller
             'msg' => 'Stok Buku Berhasil Ditambahkan',
             'buku' => $buku,
         ]);
+    }
+
+    function deleteBuku($id)
+    {
+        $buku = Buku::find($id);
+
+        if (!$buku) {
+            return response()->json(['success' => false, 'msg' => 'Book not found!']);
+        }
+
+        try {
+            $buku->delete();
+            return response()->json(['success' => true, 'msg' => 'Book deleted successfully']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'msg' => $e->getMessage()]);
+        }
     }
 }
