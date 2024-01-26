@@ -6,7 +6,9 @@ use App\Http\Controllers\BookmarkController;
 use App\Http\Controllers\DeviceController;
 use App\Http\Controllers\BukuController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ResetPasswordController;
 use App\Http\Controllers\ReviewController;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -33,12 +35,15 @@ Route::group(['middleware' => 'api', 'prefix' => 'auth'], function ($router) {
     Route::get('profile', [ProfileController::class, 'profile']);
     Route::post('update-profile', [ProfileController::class, 'updateProfile']);
     Route::get('send-verify-mail/{email}', [ProfileController::class, 'sendVerifyMail']);
-    Route::put('users/{id}/ban', [AuthController::class, 'banUser']);
+    // Route::put('users/{id}/ban', [AuthController::class, 'banUser']);
 });
+
+Route::get('reset-password', [ResetPasswordController::class, 'resetPasswordLoad']);
+Route::post('reset-password', [ResetPasswordController::class, 'resetPassword']);
 
 // ADMIN
 // buku
-Route::post('editBuku/{id}', [BukuController::class, 'editBuku']);
+Route::put('editBuku/{id}', [BukuController::class, 'editBuku']);
 Route::post('tambahBuku', [BukuController::class, 'tambahBuku']);
 Route::delete('deleteBuku/{id}', [BukuController::class, 'deleteBuku']);
 Route::put('tambah-stok-buku/{id}', [BukuController::class, 'tambahStokBuku']);
@@ -50,6 +55,7 @@ Route::delete('deleteKategori/{id}', [KategoriController::class, 'deleteKategori
 Route::delete('deleteReviews/{id}', [ReviewController::class, 'destroy']);
 Route::get('searchUser/{name}', [DeviceController::class, 'searchUser']);
 Route::delete('deleteUser/{id}', [DeviceController::class, 'deleteUser']);
+Route::get('getAllUser', [DeviceController::class, 'getAllUser']);
 
 
 // USER

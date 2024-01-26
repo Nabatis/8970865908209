@@ -239,16 +239,15 @@ class BukuController extends Controller
             ], 404);
         }
 
-        $rules = [
-            'judul' => 'string|max:255',
-            'penulis' => 'string|max:255',
-            'penerbit' => 'string|max:255',
-            'deskripsi' => '',
-            'tahun_terbit' => '',
-            'cover_buku' => 'image|mimes:jpeg,png,jpg'
-        ];
-
-        $validator = Validator::make($request->all(), $rules);
+        $validator = Validator::make($request->all(), [
+            'judul' => 'nullable|string|max:255',
+            'penulis' => 'nullable|string|max:255',
+            'penerbit' => 'nullable|string|max:255',
+            'deskripsi' => 'nullable',
+            'tahun_terbit' => 'nullable',
+            'cover_buku' => 'nullable|image|mimes:jpeg,png,jpg',
+            'id_kategori' => 'nullable',
+        ]);
 
         if ($validator->fails()) {
             return response()->json([
@@ -259,12 +258,12 @@ class BukuController extends Controller
         }
 
         // Update the fields
-        $dataBuku->judul = $request->input('judul');
-        $dataBuku->penulis = $request->input('penulis');
-        $dataBuku->penerbit = $request->input('penerbit');
-        $dataBuku->deskripsi = $request->input('deskripsi');
-        $dataBuku->tahun_terbit = $request->input('tahun_terbit');
-        $dataBuku->id_kategori = $request->input('id_kategori');
+        $dataBuku->judul = $request->filled('judul') ? $request->input('judul') : $dataBuku->judul;
+        $dataBuku->penulis = $request->filled('penulis') ? $request->input('penulis') : $dataBuku->penulis;
+        $dataBuku->penerbit = $request->filled('penerbit') ? $request->input('penerbit') : $dataBuku->penerbit;
+        $dataBuku->deskripsi = $request->filled('deskripsi') ? $request->input('deskripsi') : $dataBuku->deskripsi;
+        $dataBuku->tahun_terbit = $request->filled('tahun_terbit') ? $request->input('tahun_terbit') : $dataBuku->tahun_terbit;
+        $dataBuku->id_kategori = $request->filled('id_kategori') ? $request->input('id_kategori') : $dataBuku->id_kategori;
 
         // Update cover image if provided
         if ($request->hasFile('cover_buku')) {

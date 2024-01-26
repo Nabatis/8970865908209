@@ -15,6 +15,8 @@
     <link href="https://fonts.bunny.net/css?family=Nunito" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.18.0/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 
     <!-- Scripts -->
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
@@ -41,12 +43,13 @@
                                     @endif
 
 
-                                    <form class="mx-1 mx-md-4">
-
+                                    <form class="mx-1 mx-md-4" method="POST">
+                                        @csrf
+                                        <input type="hidden" name="id" value="{{ $user[0]['id'] }}">
                                         <div class="d-flex flex-row align-items-center mb-4">
                                             <div class="formpw flex-fill mb-0">
                                                 <input type="password" id="password" class="form-control"
-                                                    placeholder="Password" />
+                                                    placeholder="Password" name="password" />
                                                 <i class="bi bi-eye-slash" id="togglePassword"></i>
                                             </div>
                                         </div>
@@ -54,13 +57,13 @@
                                         <div class="d-flex flex-row align-items-center mb-4">
                                             <div class="formpw flex-fill mb-0">
                                                 <input type="password" id="password1" class="form-control"
-                                                    placeholder="Confirm Password" />
+                                                    placeholder="Confirm Password" name="password_confirmation" />
                                                 <i class="bi bi-eye-slash" id="togglePassword1"></i>
                                             </div>
                                         </div>
 
                                         <div class="d-flex justify-content-start mx-0 mb-3 mb-lg-3">
-                                            <button type="button" class="btn btn-primary btn-lg px-5">Confirm</button>
+                                            <input type="submit" class="btn btn-primary btn-lg px-5">
                                         </div>
 
                                     </form>
@@ -79,6 +82,8 @@
             </div>
         </div>
     </section>
+
+    <script></script>
 </body>
 
 </html>

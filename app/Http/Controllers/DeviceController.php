@@ -8,9 +8,13 @@ use Illuminate\Http\Request;
 
 class DeviceController extends Controller
 {
-    function searchUser($name)
+    public function searchUser($query)
     {
-        return User::where("name", $name)->get();
+        return User::where(function ($q) use ($query) {
+            $q->whereRaw("LOWER(name) LIKE ?", ['%' . strtolower($query) . '%'])
+                ->orWhere("nisn", 'LIKE', '%' . $query . '%')
+                ->orWhere("email", 'LIKE', '%' . $query . '%');
+        })->get();
     }
 
     function deleteUser($id)
@@ -27,5 +31,16 @@ class DeviceController extends Controller
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'msg' => $e->getMessage()]);
         }
+    }
+
+    public function getAllUser()
+    {
+        $user = User::all();
+
+        return response()->json([
+            'success' => true,
+            'msg' => 'Data user',
+            'data' => $user,
+        ]);
     }
 }
