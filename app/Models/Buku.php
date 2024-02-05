@@ -25,7 +25,7 @@ class Buku extends Model
     }
 
     // Relasi dengan model Peminjaman
-    public function peminjamans()
+    public function MasukPeminjaman()
     {
         return $this->hasMany(Peminjaman::class, 'id_buku');
     }

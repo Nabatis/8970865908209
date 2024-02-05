@@ -4,10 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Buku;
+use App\Models\Denda;
 use Illuminate\Http\Request;
-use App\Models\Peminjaman;
+use App\Models\peminjaman;
 use App\Models\Ulasan;
 use App\Models\User;
+use DateTime;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 
@@ -35,36 +38,66 @@ class BukuController extends Controller
             return response()->json(['success' => false, 'msg' => 'Buku tidak ditemukan'], 404);
         }
 
+        // Validasi apakah pengguna telah diverifikasi
+        $user = User::find($request->id_users);
+
+        if (!$user || $user->is_verified != 1) {
+            return response()->json(['success' => false, 'msg' => 'Akun belum diverifikasi untuk meminjam buku'], 400);
+        }
+
+        // Validasi apakah pengguna sedang meminjam 3 buku lain yang belum dikembalikan
+        $countExistingPeminjaman = Peminjaman::where('id_users', $request->id_users)
+            ->where('status_peminjaman', '!=', 'dikembalikan')
+            ->count();
+
+        if ($countExistingPeminjaman >= 3) {
+            return response()->json(['success' => false, 'msg' => 'Anda sudah meminjam 3 buku dan belum mengembalikannya, kembalikan terlebih dahulu'], 400);
+        }
+
         // Validasi apakah buku sedang dipinjam oleh pengguna yang sama
-        $existingPeminjaman = Peminjaman::where('id_buku', $request->id_buku)
+        $existingPeminjamanBuku = Peminjaman::where('id_buku', $request->id_buku)
             ->where('id_users', $request->id_users)
             ->where('status_peminjaman', '!=', 'dikembalikan')
             ->first();
 
-        if ($existingPeminjaman) {
+        if ($existingPeminjamanBuku) {
             return response()->json(['success' => false, 'msg' => 'Anda sudah meminjam buku ini dan belum mengembalikannya'], 400);
         }
 
-        // Membuat peminjaman baru
-        $peminjaman = Peminjaman::create([
-            'id_buku' => $request->id_buku,
-            'id_users' => $request->id_users,
-            'tgl_peminjaman' => $request->tgl_peminjaman,
-            'tgl_pengembalian' => $request->tgl_pengembalian,
-            'status_peminjaman' => 'tertunda',
-        ]);
-
-        // Update stok buku jika peminjaman disetujui
-        if ($peminjaman->status_peminjaman === 'disetujui') {
-            $buku->decrement('stock');
+        // Validasi apakah jumlah buku yang diminta tidak melebihi stok
+        if ($request->jumlah_pinjam > $buku->stock) {
+            return response()->json(['success' => false, 'msg' => 'Jumlah buku yang diminta melebihi stok yang tersedia', 'stock_tersedia' => $buku->stock,], 400);
         }
 
-        return response()->json([
-            'success' => true,
-            'msg' => 'Pinjam Berhasil',
-            'peminjaman' => $peminjaman,
-        ]);
+        try {
+            // Membuat peminjaman baru
+            $peminjaman = Peminjaman::create([
+                'id_buku' => $request->id_buku,
+                'id_users' => $request->id_users,
+                'tgl_peminjaman' => $request->tgl_peminjaman,
+                'tgl_pengembalian' => $request->tgl_pengembalian,
+                'status_peminjaman' => 'tertunda',
+                'jumlah_pinjam' => $request->jumlah_pinjam,
+            ]);
+
+            // Update stok buku
+            if ($peminjaman->status_peminjaman === 'disetujui') {
+                $buku->decrement('stock', $request->jumlah_pinjam);
+            }
+
+            return response()->json([
+                'success' => true,
+                'msg' => 'Pinjam Berhasil',
+                'peminjaman' => $peminjaman,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'msg' => 'Gagal membuat peminjaman. Silakan coba lagi.',
+            ], 500);
+        }
     }
+
 
     public function getTotalRatingAllBook()
     {
@@ -176,6 +209,37 @@ class BukuController extends Controller
         ]);
     }
 
+    public function getPaginationBuku()
+    {
+        $buku = Buku::orderBy('created_at', 'desc')->paginate(6);
+
+        if ($buku->isEmpty()) {
+            return response()->json(['success' => false, 'msg' => 'Buku tidak ditemukan'], 404);
+        }
+
+        // Get total ratings for all books
+        $totalRatingsResponse = $this->getTotalRatingAllBook();
+
+        // Check if total ratings retrieval was successful
+        if ($totalRatingsResponse->getStatusCode() == 200) {
+            $totalRatingsData = json_decode($totalRatingsResponse->getContent(), true);
+            $totalRatings = $totalRatingsData['total_ratings'];
+        } else {
+            // If there's an error in getting total ratings, set it to an empty array
+            $totalRatings = [];
+        }
+
+        // Merge total ratings with the book data
+        foreach ($buku as $key => $book) {
+            $buku[$key]['total_rating'] = $totalRatings[$key]['total_rating'] ?? null;
+        }
+
+        return response()->json([
+            'success' => true,
+            'msg' => 'Detail Buku',
+            'data' => $buku,
+        ]);
+    }
 
 
     public function detailBuku($id)
@@ -316,31 +380,80 @@ class BukuController extends Controller
         $currentStatus = $peminjaman->status_peminjaman;
         $newStatus = $request->status_peminjaman;
 
-        // Update the status
-        $peminjaman->update([
-            'status_peminjaman' => $newStatus,
-            // 'id_users' => $request->id_users,
-        ]);
+        // Retrieve the latest book information
+        $buku = $peminjaman->book->fresh();
 
-        // Update the book stock based on the status change
-        if ($currentStatus !== $newStatus) {
-            $buku = $peminjaman->book;
+        $existingDenda = $peminjaman->denda;
 
-            if ($newStatus === 'disetujui') {
-                // Decrease stock when the status changes to 'disetujui'
-                $buku->decrement('stock');
-            } elseif ($newStatus === 'dikembalikan') {
-                // Increase stock when the status changes to 'dikembalikan'
-                $buku->increment('stock');
+        DB::beginTransaction();
+
+        try {
+            // Update the status and jumlah_pinjam
+            $peminjaman->update([
+                'status_peminjaman' => $newStatus,
+                'jumlah_pinjam' => $request->jumlah_pinjam ?? $peminjaman->jumlah_pinjam,
+                // 'id_users' => $request->id_users,
+            ]);
+
+            // Update the book stock based on the status change
+            if ($currentStatus !== $newStatus) {
+                if ($newStatus === 'disetujui') {
+                    // Decrease stock when the status changes to 'disetujui'
+                    $buku->decrement('stock', $peminjaman->jumlah_pinjam);
+                } elseif ($newStatus === 'dikembalikan') {
+                    // Increase stock when the status changes to 'dikembalikan'
+                    $buku->increment('stock', $peminjaman->jumlah_pinjam);
+                }
             }
+
+            if ($newStatus === 'denda' && !$existingDenda) {
+                // Mengambil nilai jumlah_pinjam dari peminjaman
+                $jumlahPinjam = $peminjaman->jumlah_pinjam;
+
+                // Menghitung jumlah denda berdasarkan jumlah_pinjam
+                $jumlahDenda = $jumlahPinjam * 3000; // Gantilah 5000 sesuai dengan kebutuhan Anda
+
+                // Menghitung jumlah hari keterlambatan
+                $tanggalPengembalian = new DateTime($peminjaman->tgl_pengembalian);
+                $tanggalKembali = new DateTime(); // Tanggal hari ini
+                $selisihHari = $tanggalKembali->diff($tanggalPengembalian)->days;
+
+                // Menambahkan denda tambahan jika terlambat
+                if ($selisihHari > 0) {
+                    $dendaTambahan = $selisihHari * 1000; // Gantilah 1000 sesuai dengan kebutuhan Anda
+                    $jumlahDenda += $dendaTambahan;
+                }
+
+                $dendaData = [
+                    'id_peminjaman' => $peminjaman->id,
+                    'id_user' => $peminjaman->id_users,
+                    'tgl_pembayaran' => null, // Sesuaikan dengan kebutuhan, mungkin tgl_pembayaran seharusnya bukan null
+                    'status_pembayaran' => 'belum_dibayar', // Sesuaikan dengan kebutuhan
+                    'jumlah' => $jumlahDenda, // Menambahkan nilai jumlah denda ke data denda
+                ];
+
+                $denda = Denda::create($dendaData);
+            }
+
+
+            // Commit the transaction
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'msg' => 'Status Peminjaman Berhasil Diupdate',
+                'peminjaman' => $peminjaman,
+                'denda' => isset($denda) ? $denda : null,
+            ]);
+        } catch (\Exception $e) {
+            // Rollback the transaction on error
+            DB::rollBack();
+
+            return response()->json([
+                'success' => false,
+                'msg' => 'Gagal mengupdate status peminjaman',
+            ], 500);
         }
-
-
-        return response()->json([
-            'success' => true,
-            'msg' => 'Status Peminjaman Berhasil Diupdate',
-            'peminjaman' => $peminjaman,
-        ]);
     }
 
     public function tambahStokBuku(Request $request, $id)

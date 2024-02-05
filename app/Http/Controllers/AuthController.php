@@ -144,6 +144,7 @@ class AuthController extends Controller
 
                 $data['url'] = $url;
                 $data['email'] = $request->email;
+
                 $data['title'] = "Password Reset";
                 $data['body'] = "Please click on below link to reset your password";
 

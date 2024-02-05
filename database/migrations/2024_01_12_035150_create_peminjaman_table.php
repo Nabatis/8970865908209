@@ -19,6 +19,7 @@ class CreatePeminjamanTable extends Migration
             $table->unsignedBigInteger('id_users');
             $table->dateTime('tgl_peminjaman')->default(null);
             $table->dateTime('tgl_pengembalian')->default(null);
+            $table->unsignedInteger('jumlah_pinjam')->default(1);
             $table->enum('status_peminjaman', ['tertunda', 'disetujui', 'ditolak', 'dikembalikan', 'denda'])->default('tertunda');
             $table->timestamps();
 

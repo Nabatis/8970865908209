@@ -5,6 +5,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BookmarkController;
 use App\Http\Controllers\DeviceController;
 use App\Http\Controllers\BukuController;
+use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\DendaController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ResetPasswordController;
 use App\Http\Controllers\ReviewController;
@@ -48,27 +50,39 @@ Route::post('tambahBuku', [BukuController::class, 'tambahBuku']);
 Route::delete('deleteBuku/{id}', [BukuController::class, 'deleteBuku']);
 Route::put('tambah-stok-buku/{id}', [BukuController::class, 'tambahStokBuku']);
 Route::post('updateStatus/{id}', [BukuController::class, 'updateStatus']);
+
 Route::post('tambahKategori', [KategoriController::class, 'store']);
 Route::delete('deleteKategori/{id}', [KategoriController::class, 'deleteKategori']);
 
 // dll
 Route::delete('deleteReviews/{id}', [ReviewController::class, 'destroy']);
+
 Route::get('searchUser/{name}', [DeviceController::class, 'searchUser']);
 Route::delete('deleteUser/{id}', [DeviceController::class, 'deleteUser']);
 Route::get('getAllUser', [DeviceController::class, 'getAllUser']);
+
+// denda
+Route::get('hitungDenda/{id_peminjaman}', [DendaController::class, 'hitungDenda']);
+Route::get('dataDenda', [DendaController::class, 'index']);
 
 
 // USER
 Route::post('peminjaman', [BukuController::class, 'pinjamBuku']);
 Route::get('dataBuku', [BukuController::class, 'getBuku']);
+Route::get('paginationBuku', [BukuController::class, 'getPaginationBuku']);
 Route::get('dataBukuPopuler', [BukuController::class, 'getBukuHighRating']);
 Route::get('detailBuku/{id}', [BukuController::class, 'detailBuku']);
 Route::get('searchBuku', [BukuController::class, 'search']);
+Route::get('total-rating-all-book', [BukuController::class, 'getTotalRatingAllBook']);
+Route::post('submitBorrowingRequest', [BukuController::class, 'submitBorrowingRequest']);
+Route::post('submitPeminjaman', [BukuController::class, 'submitPeminjaman']);
+
+
 Route::post('reviews', [ReviewController::class, 'store']);
 Route::get('total-rating/{id_buku}', [ReviewController::class, 'getTotalRating']);
-Route::get('total-rating-all-book', [BukuController::class, 'getTotalRatingAllBook']);
 Route::get('getReviews', [ReviewController::class, 'getUlasan']);
 Route::get('getReviews/{bookId}', [ReviewController::class, 'getUlasanByBookId']);
+
 Route::post('bookmark/add', [BookmarkController::class, 'addToBookmark']);
 Route::delete('unbookmark', [BookmarkController::class, 'unbookmark']);
 

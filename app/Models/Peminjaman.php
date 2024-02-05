@@ -14,6 +14,7 @@ class Peminjaman extends Model
         'tgl_peminjaman',
         'tgl_pengembalian',
         'status_peminjaman',
+        'jumlah_pinjam'
     ];
 
     // Relasi dengan model Book
