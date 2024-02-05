@@ -45,7 +45,7 @@ Route::post('reset-password', [ResetPasswordController::class, 'resetPassword'])
 
 // ADMIN
 // buku
-Route::put('editBuku/{id}', [BukuController::class, 'editBuku']);
+Route::post('editBuku/{id}', [BukuController::class, 'editBuku']);
 Route::post('tambahBuku', [BukuController::class, 'tambahBuku']);
 Route::delete('deleteBuku/{id}', [BukuController::class, 'deleteBuku']);
 Route::put('tambah-stok-buku/{id}', [BukuController::class, 'tambahStokBuku']);

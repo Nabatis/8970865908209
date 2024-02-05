@@ -19,7 +19,7 @@ class CreateBooksTable extends Migration
             $table->string('judul');
             $table->string('penulis');
             $table->string('penerbit');
-            $table->string('deskripsi');
+            $table->text('deskripsi');
             $table->unsignedBigInteger('id_kategori')->nullable();
             $table->unsignedSmallInteger('tahun_terbit');
             $table->unsignedInteger('stock')->default(0);
