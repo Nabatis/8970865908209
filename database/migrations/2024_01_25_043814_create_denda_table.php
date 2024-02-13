@@ -17,7 +17,8 @@ return new class extends Migration
             $table->unsignedBigInteger('id_user')->nullable(); // Menambah kolom id_user
             $table->unsignedInteger('jumlah');
             $table->date('tgl_pembayaran')->nullable(); // Menambah kolom tgl_pembayaran
-            $table->enum('status_pembayaran', ['belum_dibayar', 'sudah_dibayar'])->default('belum_dibayar'); // Menambah kolom status_pembayaran
+            $table->enum('status_pembayaran', ['belum_dibayar', 'sudah_dibayar'])->default('belum_dibayar');
+            $table->unsignedInteger('jumlah_hari_denda')->default(0); // Menambah kolom status_pembayaran
             $table->timestamps();
 
             $table->foreign('id_peminjaman')->references('id')->on('peminjaman')->onDelete('cascade');

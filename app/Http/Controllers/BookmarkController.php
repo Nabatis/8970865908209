@@ -59,4 +59,15 @@ class BookmarkController extends Controller
 
         return response()->json(['message' => 'Pengguna tidak terotentikasi'], 401);
     }
+
+    public function getBookmark($userId)
+    {
+        $bookmarks = Bookmark::where('id_users', $userId)->get();
+
+        if ($bookmarks->isEmpty()) {
+            return response()->json(['success' => false, 'message' => 'Tidak ada bookmark untuk pengguna ini'], 404);
+        }
+
+        return response()->json(['success' => true, 'data' => $bookmarks]);
+    }
 }

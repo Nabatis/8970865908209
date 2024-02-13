@@ -26,6 +26,10 @@ Route::get('/login', function () {
     return view('login');
 });
 
+Route::get('/tambahbuku', function () {
+    return view('tambahbuku');
+});
+
 Route::get('/profile', function () {
     return view('profile');
 });

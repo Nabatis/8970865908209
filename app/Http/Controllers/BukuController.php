@@ -413,17 +413,6 @@ class BukuController extends Controller
                 // Menghitung jumlah denda berdasarkan jumlah_pinjam
                 $jumlahDenda = $jumlahPinjam * 3000; // Gantilah 5000 sesuai dengan kebutuhan Anda
 
-                // Menghitung jumlah hari keterlambatan
-                $tanggalPengembalian = new DateTime($peminjaman->tgl_pengembalian);
-                $tanggalKembali = new DateTime(); // Tanggal hari ini
-                $selisihHari = $tanggalKembali->diff($tanggalPengembalian)->days;
-
-                // Menambahkan denda tambahan jika terlambat
-                if ($selisihHari > 0) {
-                    $dendaTambahan = $selisihHari * 1000; // Gantilah 1000 sesuai dengan kebutuhan Anda
-                    $jumlahDenda += $dendaTambahan;
-                }
-
                 $dendaData = [
                     'id_peminjaman' => $peminjaman->id,
                     'id_user' => $peminjaman->id_users,

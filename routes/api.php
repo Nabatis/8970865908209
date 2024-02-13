@@ -7,6 +7,7 @@ use App\Http\Controllers\DeviceController;
 use App\Http\Controllers\BukuController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\DendaController;
+use App\Http\Controllers\PeminjamanController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ResetPasswordController;
 use App\Http\Controllers\ReviewController;
@@ -50,6 +51,7 @@ Route::post('tambahBuku', [BukuController::class, 'tambahBuku']);
 Route::delete('deleteBuku/{id}', [BukuController::class, 'deleteBuku']);
 Route::put('tambah-stok-buku/{id}', [BukuController::class, 'tambahStokBuku']);
 Route::post('updateStatus/{id}', [BukuController::class, 'updateStatus']);
+Route::get('getPeminjaman', [PeminjamanController::class, 'getPeminjaman']);
 
 Route::post('tambahKategori', [KategoriController::class, 'store']);
 Route::delete('deleteKategori/{id}', [KategoriController::class, 'deleteKategori']);
@@ -64,6 +66,11 @@ Route::get('getAllUser', [DeviceController::class, 'getAllUser']);
 // denda
 Route::get('hitungDenda/{id_peminjaman}', [DendaController::class, 'hitungDenda']);
 Route::get('dataDenda', [DendaController::class, 'index']);
+Route::post('dataDenda', [DendaController::class, 'storeOrUpdate']);
+Route::post('updateBayar/{id}', [DendaController::class, 'updateBayar']);
+
+
+Route::get('reminderEmail/{id}', [DendaController::class, 'sendReminderEmail']);
 
 
 // USER
@@ -85,6 +92,7 @@ Route::get('getReviews/{bookId}', [ReviewController::class, 'getUlasanByBookId']
 
 Route::post('bookmark/add', [BookmarkController::class, 'addToBookmark']);
 Route::delete('unbookmark', [BookmarkController::class, 'unbookmark']);
+Route::get('getBookmark', [BookmarkController::class, 'getBookmark']);
 
 Route::get('dataKategori/{id}', [KategoriController::class, 'show']);
 Route::get('dataKategori', [KategoriController::class, 'index']);

@@ -14,7 +14,8 @@ class Denda extends Model
         'id_user',
         'jumlah',
         'tgl_pembayaran',
-        'status_pembayaran'
+        'status_pembayaran',
+        'jumlah_hari_denda'
     ];
 
     public function peminjaman()
@@ -24,6 +25,18 @@ class Denda extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'id_user');
+        return $this->belongsTo(User::class, 'id_user')->select('id', 'email');
+    }
+
+    public function buku()
+    {
+        // Navigasi ke model Buku melalui relasi Peminjaman
+        return $this->peminjaman->book;
+    }
+
+    public function pengguna()
+    {
+        // Navigasi ke model Buku melalui relasi Peminjaman
+        return $this->peminjaman->user;
     }
 }
