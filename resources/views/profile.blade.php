@@ -7,7 +7,7 @@
 </div>
 
 <form action="" id="profileForm">
-    <input type="hidden" value="" name="id" id="user_id">
+    <input type="" value="" name="id" id="user_id">
     <input type="text" name="name" placeholder="Enter name" id="name">
     <br>
     <span class="error name_err" style="color:red"></span>

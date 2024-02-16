@@ -7,6 +7,7 @@ use App\Http\Controllers\DeviceController;
 use App\Http\Controllers\BukuController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\DendaController;
+use App\Http\Controllers\Durasipeminjaman;
 use App\Http\Controllers\PeminjamanController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ResetPasswordController;
@@ -54,7 +55,13 @@ Route::post('updateStatus/{id}', [BukuController::class, 'updateStatus']);
 Route::get('getPeminjaman', [PeminjamanController::class, 'getPeminjaman']);
 
 Route::post('tambahKategori', [KategoriController::class, 'store']);
+Route::post('updateKategori/{id}', [KategoriController::class, 'updateKategori']);
 Route::delete('deleteKategori/{id}', [KategoriController::class, 'deleteKategori']);
+
+Route::post('storeDurasiPeminjaman', [Durasipeminjaman::class, 'store']);
+Route::post('updateDurasiPeminjaman/{id}', [Durasipeminjaman::class, 'update']);
+Route::delete('deleteDurasiPeminjaman/{id}', [Durasipeminjaman::class, 'delete']);
+
 
 // dll
 Route::delete('deleteReviews/{id}', [ReviewController::class, 'destroy']);

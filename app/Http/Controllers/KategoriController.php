@@ -38,7 +38,7 @@ class KategoriController extends Controller
         return response()->json(['msg' => 'Kategori created successfully', 'data' => $kategori], 201);
     }
 
-    public function update(Request $request, $id)
+    public function updateKategori(Request $request, $id)
     {
         $kategori = Kategori::find($id);
 
@@ -54,7 +54,11 @@ class KategoriController extends Controller
             'name' => $request->input('name'),
         ]);
 
-        return response()->json(['msg' => 'Kategori updated successfully', 'data' => $kategori], 200);
+        if (!$kategori) {
+            return response()->json(['success' => false, 'msg' => 'Kategori not found'], 404);
+        }
+
+        return response()->json(['success' => true, 'data' => $kategori], 200);
     }
 
     public function deleteKategori($id)
