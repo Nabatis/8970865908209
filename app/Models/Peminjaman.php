@@ -11,6 +11,7 @@ class Peminjaman extends Model
     protected $fillable = [
         'id_buku',
         'id_users',
+        'id_durasi_peminjaman',
         'tgl_peminjaman',
         'tgl_pengembalian',
         'status_peminjaman',
@@ -21,6 +22,11 @@ class Peminjaman extends Model
     public function book()
     {
         return $this->belongsTo(Buku::class, 'id_buku');
+    }
+
+    public function durasipinjam()
+    {
+        return $this->hasMany(durasipinjam::class, 'id_durasi_peminjaman');
     }
 
     // Relasi dengan model User

@@ -62,10 +62,16 @@ class BookmarkController extends Controller
 
     public function getBookmark($userId)
     {
-        $bookmarks = Bookmark::where('id_users', $userId)->get();
+        $bookmarks = Bookmark::where('id_users', $userId)->paginate(6);
 
         if ($bookmarks->isEmpty()) {
             return response()->json(['success' => false, 'message' => 'Tidak ada bookmark untuk pengguna ini'], 404);
+        }
+
+        $bookmarkedBooks = [];
+        foreach ($bookmarks as $bookmark) {
+            // Mengakses seluruh data buku yang di-bookmark langsung melalui relasi 'buku'
+            $bookmarkedBooks[] = $bookmark->buku;
         }
 
         return response()->json(['success' => true, 'data' => $bookmarks]);

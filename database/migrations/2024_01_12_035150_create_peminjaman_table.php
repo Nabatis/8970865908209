@@ -16,6 +16,7 @@ class CreatePeminjamanTable extends Migration
         Schema::create('peminjaman', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('id_buku');
+            $table->unsignedBigInteger('id_durasi_peminjaman');
             $table->unsignedBigInteger('id_users');
             $table->dateTime('tgl_peminjaman')->default(null);
             $table->dateTime('tgl_pengembalian')->default(null);
@@ -24,6 +25,7 @@ class CreatePeminjamanTable extends Migration
             $table->timestamps();
 
             $table->foreign('id_buku')->references('id')->on('buku')->onDelete('cascade');
+            $table->foreign('id_durasi_peminjaman')->references('id')->on('durasipinjam')->onDelete('cascade');
             $table->foreign('id_users')->references('id')->on('users')->onDelete('cascade');
         });
     }

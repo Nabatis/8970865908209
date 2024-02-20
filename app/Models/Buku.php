@@ -29,4 +29,14 @@ class Buku extends Model
     {
         return $this->hasMany(Peminjaman::class, 'id_buku');
     }
+
+    public function kategori()
+    {
+        return $this->belongsTo(Kategori::class, 'id_kategori');
+    }
+
+    public function namaKategori()
+    {
+        return $this->kategori->name; // "name" adalah nama kolom di tabel kategori yang menyimpan nama kategori
+    }
 }

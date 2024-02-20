@@ -21,4 +21,10 @@ class Bookmark extends Model
     {
         return $this->belongsTo(User::class, 'id_users');
     }
+
+    public function getbuku()
+    {
+        // Navigasi ke model Buku melalui relasi Peminjaman
+        return $this->Bookmark->book;
+    }
 }

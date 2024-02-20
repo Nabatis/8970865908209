@@ -99,7 +99,7 @@ Route::get('getReviews/{bookId}', [ReviewController::class, 'getUlasanByBookId']
 
 Route::post('bookmark/add', [BookmarkController::class, 'addToBookmark']);
 Route::delete('unbookmark', [BookmarkController::class, 'unbookmark']);
-Route::get('getBookmark', [BookmarkController::class, 'getBookmark']);
+Route::get('getBookmark/{userId}', [BookmarkController::class, 'getBookmark']);
 
 Route::get('dataKategori/{id}', [KategoriController::class, 'show']);
 Route::get('dataKategori', [KategoriController::class, 'index']);

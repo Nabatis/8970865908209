@@ -7,8 +7,10 @@ use App\Models\Buku;
 use App\Models\Denda;
 use Illuminate\Http\Request;
 use App\Models\peminjaman;
+use App\Models\durasipinjam;
 use App\Models\Ulasan;
 use App\Models\User;
+use Carbon\Carbon;
 use DateTime;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -20,22 +22,15 @@ class BukuController extends Controller
 
     public function pinjamBuku(Request $request)
     {
-        $validator = Validator::make(request()->all(), [
+        $validator = Validator::make($request->all(), [
             'id_buku' => 'required|exists:buku,id',
             'id_users' => 'required|exists:users,id',
             'tgl_peminjaman' => 'required|date',
-            'tgl_pengembalian' => 'required|date',
+            'id_durasi_peminjaman' => 'required|exists:durasi_peminjaman,id',
         ]);
 
         if ($validator->fails()) {
-            return response()->json($validator->errors());
-        }
-
-        // Validasi buku sebelum membuat peminjaman
-        $buku = Buku::find($request->id_buku);
-
-        if (!$buku) {
-            return response()->json(['success' => false, 'msg' => 'Buku tidak ditemukan'], 404);
+            return response()->json($validator->errors(), 400);
         }
 
         // Validasi apakah pengguna telah diverifikasi
@@ -45,23 +40,20 @@ class BukuController extends Controller
             return response()->json(['success' => false, 'msg' => 'Akun belum diverifikasi untuk meminjam buku'], 400);
         }
 
-        // Validasi apakah pengguna sedang meminjam 3 buku lain yang belum dikembalikan
-        $countExistingPeminjaman = Peminjaman::where('id_users', $request->id_users)
+        // Validasi apakah pengguna sedang meminjam buku lain yang belum dikembalikan
+        $existingPeminjaman = Peminjaman::where('id_users', $request->id_users)
             ->where('status_peminjaman', '!=', 'dikembalikan')
             ->count();
 
-        if ($countExistingPeminjaman >= 3) {
-            return response()->json(['success' => false, 'msg' => 'Anda sudah meminjam 3 buku dan belum mengembalikannya, kembalikan terlebih dahulu'], 400);
+        if ($existingPeminjaman >= 1) {
+            return response()->json(['success' => false, 'msg' => 'Anda sudah meminjam buku dan belum mengembalikannya, kembalikan terlebih dahulu'], 400);
         }
 
-        // Validasi apakah buku sedang dipinjam oleh pengguna yang sama
-        $existingPeminjamanBuku = Peminjaman::where('id_buku', $request->id_buku)
-            ->where('id_users', $request->id_users)
-            ->where('status_peminjaman', '!=', 'dikembalikan')
-            ->first();
+        // Validasi buku sebelum membuat peminjaman
+        $buku = Buku::find($request->id_buku);
 
-        if ($existingPeminjamanBuku) {
-            return response()->json(['success' => false, 'msg' => 'Anda sudah meminjam buku ini dan belum mengembalikannya'], 400);
+        if (!$buku) {
+            return response()->json(['success' => false, 'msg' => 'Buku tidak ditemukan'], 404);
         }
 
         // Validasi apakah jumlah buku yang diminta tidak melebihi stok
@@ -70,19 +62,29 @@ class BukuController extends Controller
         }
 
         try {
+            // Ambil durasi peminjaman berdasarkan id_durasi_peminjaman
+            $durasiPeminjaman = durasipinjam::find($request->id_durasi_peminjaman);
+
+            if (!$durasiPeminjaman) {
+                return response()->json(['success' => false, 'msg' => 'Durasi peminjaman tidak ditemukan'], 404);
+            }
+
+            // Hitung tanggal pengembalian
+            $tgl_pengembalian = Carbon::parse($request->tgl_peminjaman)->addDays($durasiPeminjaman->durasi_hari);
+
             // Membuat peminjaman baru
             $peminjaman = Peminjaman::create([
                 'id_buku' => $request->id_buku,
                 'id_users' => $request->id_users,
                 'tgl_peminjaman' => $request->tgl_peminjaman,
-                'tgl_pengembalian' => $request->tgl_pengembalian,
+                'tgl_pengembalian' => $tgl_pengembalian,
                 'status_peminjaman' => 'tertunda',
-                'jumlah_pinjam' => $request->jumlah_pinjam,
+                'jumlah_pinjam' => 1, // Mengubah jumlah pinjam menjadi 1
             ]);
 
             // Update stok buku
             if ($peminjaman->status_peminjaman === 'disetujui') {
-                $buku->decrement('stock', $request->jumlah_pinjam);
+                $buku->decrement('stock');
             }
 
             return response()->json([
@@ -97,6 +99,7 @@ class BukuController extends Controller
             ], 500);
         }
     }
+
 
 
     public function getTotalRatingAllBook()
@@ -349,13 +352,29 @@ class BukuController extends Controller
     public function search(Request $request)
     {
         $query = $request->get('query');
+        $kategori = $request->get('kategori');
 
-        $buku = Buku::where('judul', 'like', "%$query%")
-            ->orWhere('penulis', 'like', "%$query%")
-            ->orWhere('penerbit', 'like', "%$query%")
-            ->get();
+        $queryBuilder = Buku::query();
 
-        return response()->json(['message' => 'buku created successfully', 'searchBuku' => $buku], 201);
+        if (!empty($query)) {
+            $queryBuilder->where('judul', 'like', "%$query%")
+                ->orWhere('penulis', 'like', "%$query%")
+                ->orWhere('penerbit', 'like', "%$query%");
+        }
+
+        if (!empty($kategori)) {
+            $queryBuilder->whereHas('kategori', function ($query) use ($kategori) {
+                $query->where('name', 'like', "%$kategori%");
+            });
+        }
+
+        $buku = $queryBuilder->get();
+
+        if ($buku->isEmpty()) {
+            return response()->json(['success' => false, 'message' => 'No books found matching the query'], 404);
+        } else {
+            return response()->json(['success' => true, 'message' => 'Books retrieved successfully', 'searchBuku' => $buku], 200);
+        }
     }
 
     public function updateStatus(Request $request, $id)

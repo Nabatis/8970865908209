@@ -33,4 +33,17 @@ class Durasipeminjaman extends Controller
 
         return response()->json(['message' => 'Durasi peminjaman berhasil diperbarui', 'data' => $durasiPeminjaman], 200);
     }
+
+    public function delete($id)
+    {
+        $durasipinjam = durasipinjam::find($id);
+
+        if (!$durasipinjam) {
+            return response()->json(['msg' => 'durasi pinjam not found'], 404);
+        }
+
+        $durasipinjam->delete();
+
+        return response()->json(['msg' => 'durasi pinjam deleted successfully'], 200);
+    }
 }
