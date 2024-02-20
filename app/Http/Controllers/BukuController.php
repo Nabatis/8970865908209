@@ -7,7 +7,6 @@ use App\Models\Buku;
 use App\Models\Denda;
 use Illuminate\Http\Request;
 use App\Models\peminjaman;
-use App\Models\durasipinjam;
 use App\Models\Ulasan;
 use App\Models\User;
 use Carbon\Carbon;
@@ -20,85 +19,7 @@ use Illuminate\Support\Facades\Storage;
 class BukuController extends Controller
 {
 
-    public function pinjamBuku(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'id_buku' => 'required|exists:buku,id',
-            'id_users' => 'required|exists:users,id',
-            'tgl_peminjaman' => 'required|date',
-            'id_durasi_peminjaman' => 'required|exists:durasi_peminjaman,id',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 400);
-        }
-
-        // Validasi apakah pengguna telah diverifikasi
-        $user = User::find($request->id_users);
-
-        if (!$user || $user->is_verified != 1) {
-            return response()->json(['success' => false, 'msg' => 'Akun belum diverifikasi untuk meminjam buku'], 400);
-        }
-
-        // Validasi apakah pengguna sedang meminjam buku lain yang belum dikembalikan
-        $existingPeminjaman = Peminjaman::where('id_users', $request->id_users)
-            ->where('status_peminjaman', '!=', 'dikembalikan')
-            ->count();
-
-        if ($existingPeminjaman >= 1) {
-            return response()->json(['success' => false, 'msg' => 'Anda sudah meminjam buku dan belum mengembalikannya, kembalikan terlebih dahulu'], 400);
-        }
-
-        // Validasi buku sebelum membuat peminjaman
-        $buku = Buku::find($request->id_buku);
-
-        if (!$buku) {
-            return response()->json(['success' => false, 'msg' => 'Buku tidak ditemukan'], 404);
-        }
-
-        // Validasi apakah jumlah buku yang diminta tidak melebihi stok
-        if ($request->jumlah_pinjam > $buku->stock) {
-            return response()->json(['success' => false, 'msg' => 'Jumlah buku yang diminta melebihi stok yang tersedia', 'stock_tersedia' => $buku->stock,], 400);
-        }
-
-        try {
-            // Ambil durasi peminjaman berdasarkan id_durasi_peminjaman
-            $durasiPeminjaman = durasipinjam::find($request->id_durasi_peminjaman);
-
-            if (!$durasiPeminjaman) {
-                return response()->json(['success' => false, 'msg' => 'Durasi peminjaman tidak ditemukan'], 404);
-            }
-
-            // Hitung tanggal pengembalian
-            $tgl_pengembalian = Carbon::parse($request->tgl_peminjaman)->addDays($durasiPeminjaman->durasi_hari);
-
-            // Membuat peminjaman baru
-            $peminjaman = Peminjaman::create([
-                'id_buku' => $request->id_buku,
-                'id_users' => $request->id_users,
-                'tgl_peminjaman' => $request->tgl_peminjaman,
-                'tgl_pengembalian' => $tgl_pengembalian,
-                'status_peminjaman' => 'tertunda',
-                'jumlah_pinjam' => 1, // Mengubah jumlah pinjam menjadi 1
-            ]);
-
-            // Update stok buku
-            if ($peminjaman->status_peminjaman === 'disetujui') {
-                $buku->decrement('stock');
-            }
-
-            return response()->json([
-                'success' => true,
-                'msg' => 'Pinjam Berhasil',
-                'peminjaman' => $peminjaman,
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'msg' => 'Gagal membuat peminjaman. Silakan coba lagi.',
-            ], 500);
-        }
-    }
+    
 
 
 

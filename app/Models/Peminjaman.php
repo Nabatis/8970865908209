@@ -26,7 +26,7 @@ class Peminjaman extends Model
 
     public function durasipinjam()
     {
-        return $this->hasMany(durasipinjam::class, 'id_durasi_peminjaman');
+        return $this->hasMany(Durasipinjam::class, 'id_durasi_peminjaman');
     }
 
     // Relasi dengan model User

@@ -1,3 +1,4 @@
+
 <?php
 
 use Illuminate\Database\Migrations\Migration;
@@ -18,8 +19,8 @@ class CreatePeminjamanTable extends Migration
             $table->unsignedBigInteger('id_buku');
             $table->unsignedBigInteger('id_users');
             $table->unsignedBigInteger('id_durasi_peminjaman');
-            $table->dateTime('tgl_peminjaman')->default(null);
-            $table->dateTime('tgl_pengembalian')->default(null);
+            $table->dateTime('tgl_peminjaman');
+            $table->dateTime('tgl_pengembalian');
             $table->unsignedInteger('jumlah_pinjam')->default(1);
             $table->enum('status_peminjaman', ['tertunda', 'disetujui', 'ditolak', 'dikembalikan', 'denda'])->default('tertunda');
             $table->timestamps();

@@ -9,6 +9,7 @@ use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\DendaController;
 use App\Http\Controllers\Durasipeminjaman;
 use App\Http\Controllers\PeminjamanController;
+use App\Http\Controllers\PinjamController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ResetPasswordController;
 use App\Http\Controllers\ReviewController;
@@ -82,7 +83,7 @@ Route::get('reminderEmail/{id}', [DendaController::class, 'sendReminderEmail']);
 
 
 // USER
-Route::post('peminjaman', [BukuController::class, 'pinjamBuku']);
+Route::post('peminjaman', [PinjamController::class, 'pinjamBukuUser']);
 Route::get('dataBuku', [BukuController::class, 'getBuku']);
 Route::get('paginationBuku', [BukuController::class, 'getPaginationBuku']);
 Route::get('dataBukuPopuler', [BukuController::class, 'getBukuHighRating']);
