@@ -46,4 +46,15 @@ class Durasipeminjaman extends Controller
 
         return response()->json(['msg' => 'durasi pinjam deleted successfully'], 200);
     }
+
+    public function getDurasiPinjam()
+    {
+        $durasi = durasipinjam::all();
+
+        return response()->json([
+            'success' => true,
+            'msg' => 'Data user',
+            'data' => $durasi,
+        ]);
+    }
 }

@@ -58,6 +58,7 @@ Route::post('tambahKategori', [KategoriController::class, 'store']);
 Route::post('updateKategori/{id}', [KategoriController::class, 'updateKategori']);
 Route::delete('deleteKategori/{id}', [KategoriController::class, 'deleteKategori']);
 
+Route::get('getDurasiPeminjaman', [Durasipeminjaman::class, 'getDurasiPinjam']);
 Route::post('storeDurasiPeminjaman', [Durasipeminjaman::class, 'store']);
 Route::post('updateDurasiPeminjaman/{id}', [Durasipeminjaman::class, 'update']);
 Route::delete('deleteDurasiPeminjaman/{id}', [Durasipeminjaman::class, 'delete']);
