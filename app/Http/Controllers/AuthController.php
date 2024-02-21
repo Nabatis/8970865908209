@@ -66,14 +66,22 @@ class AuthController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json($validator->errors());
+            return response()->json($validator->errors(), 422);
         }
 
         if (!$token = auth()->attempt($validator->validated())) {
-            return response()->json(['success' => false, 'msg' => 'Username & Password is incorrect']);
+            return response()->json(['success' => false, 'msg' => 'Username & Password is incorrect'], 401);
         }
 
-        return $this->respondWithToken($token);
+        // Get the authenticated user
+        $user = auth()->user();
+
+        // Return token along with user role
+        return response()->json([
+            'success' => true,
+            'token' => $token,
+            'role' => $user->role // Assuming the user role is stored in a column named 'role'
+        ]);
     }
 
     /**

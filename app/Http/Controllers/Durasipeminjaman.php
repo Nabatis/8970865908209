@@ -57,4 +57,15 @@ class Durasipeminjaman extends Controller
             'data' => $durasi,
         ]);
     }
+
+    public function show($id)
+    {
+        $durasipinjam = durasipinjam::find($id);
+
+        if (!$durasipinjam) {
+            return response()->json(['success' => false, 'msg' => 'Kategori not found'], 404);
+        }
+
+        return response()->json(['success' => true, 'data' => $durasipinjam], 200);
+    }
 }
