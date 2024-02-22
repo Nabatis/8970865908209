@@ -16,16 +16,18 @@ class RiwayatController extends Controller
             ->get();
 
         if ($pinjam->isEmpty()) {
-            return response()->json(['success' => true, 'false' => 'Tidak ada data denda'], 404);
+            return response()->json(['success' => true, 'false' => 'Tidak ada data'], 404);
         }
 
         // Ubah data yang diperoleh menjadi format yang sesuai sebelum mengirimkan respons
         $formattedPeminjaman = $pinjam->map(function ($peminjaman) {
             return [
                 'id' => $peminjaman->id,
-                'judul_buku' => $peminjaman->book->judul, // Mengambil judul buku dari relasi
-                'nama_user' => $peminjaman->user->name, // Mengambil nama user dari relasi
-                'nisn_user' => $peminjaman->user->nisn, // Mengambil NISN user dari relasi
+                'judul_buku' => $peminjaman->book->judul,
+                'cover_buku' => $peminjaman->book->cover_buku,
+                'deskripsi' => $peminjaman->book->deskripsi,
+                'nama_user' => $peminjaman->user->name,
+                'nisn_user' => $peminjaman->user->nisn,
                 'tgl_peminjaman' => $peminjaman->tgl_peminjaman,
                 'tgl_pengembalian' => $peminjaman->tgl_pengembalian,
                 'jumlah_pinjam' => $peminjaman->jumlah_pinjam,

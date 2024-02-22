@@ -34,8 +34,8 @@ class AuthController extends Controller
     public function register()
     {
         $validator = Validator::make(request()->all(), [
-            'nisn' => 'required|string',
-            'name' => 'required|string|min:3',
+            'nisn' => 'required|string|unique:users,nisn',
+            'name' => 'required|string|min:3|unique:users,name',
             'email' => 'required|email|unique:users',
             'password' => 'required|string|min:6',
         ]);
@@ -52,11 +52,20 @@ class AuthController extends Controller
             'role' => 'user',
         ]);
 
-        return response()->json([
-            'msg' => 'User inserted Successfully',
-            'user' => $user
-        ]);
+        if ($user) {
+            return response()->json([
+                'success' => true,
+                'msg' => 'User inserted Successfully',
+                'user' => $user
+            ]);
+        } else {
+            return response()->json([
+                'success' => false,
+                'msg' => 'Failed to insert user'
+            ]);
+        }
     }
+
 
     public function login(Request $request)
     {
