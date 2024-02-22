@@ -33,7 +33,7 @@ class PinjamController extends Controller
         }
 
         $existingPeminjaman = Peminjaman::where('id_users', $request->id_users)
-            ->where('status_peminjaman', '!=', 'dikembalikan')
+            ->whereNotIn('status_peminjaman', ['dikembalikan', 'ditolak'])
             ->count();
 
         if ($existingPeminjaman >= 1) {
@@ -69,7 +69,7 @@ class PinjamController extends Controller
                 'jumlah_pinjam' => 1,
             ]);
 
-            if ($peminjaman->status_peminjaman === 'tertunda') {
+            if ($peminjaman->status_peminjaman === 'disetujui') {
                 $buku->decrement('stock');
             }
 
@@ -81,6 +81,7 @@ class PinjamController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
+                'msg' => 'Pinjam Gagal Dibuat',
                 'error' => $e->getMessage(),
             ], 500);
         }
