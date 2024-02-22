@@ -78,6 +78,7 @@ Route::get('getAllUser', [DeviceController::class, 'getAllUser']);
 Route::get('indexDendaByUser/{userId}', [DendaController::class, 'indexDendaByUser']);
 Route::get('hitungDenda/{id_peminjaman}', [DendaController::class, 'hitungDenda']);
 Route::get('dataDenda', [DendaController::class, 'index']);
+Route::get('dataDenda/{id}', [DendaController::class, 'show']);
 Route::post('dataDenda', [DendaController::class, 'storeOrUpdate']);
 Route::post('updateBayar/{id}', [DendaController::class, 'updateBayar']);
 

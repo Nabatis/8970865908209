@@ -42,7 +42,7 @@ class DendaController extends Controller
 
             return [
                 'id' => $dendaBuku->id,
-                'judul_buku' => $dendaBuku->peminjaman->book->judul,
+                'judul_buku' => $dendaBuku->peminjaman->bok->judul,
                 'nama_user' => $dendaBuku->peminjaman->user->name,
                 'nisn_user' => $dendaBuku->peminjaman->user->nisn,
                 'tgl_peminjaman' => $dendaBuku->peminjaman->tgl_peminjaman,
@@ -95,6 +95,7 @@ class DendaController extends Controller
             return [
                 'id' => $dendaBuku->id,
                 'id_buku' => $dendaBuku->peminjaman->book->id,
+                'cover_buku' => $dendaBuku->peminjaman->book->cover_buku,
                 'judul_buku' => $dendaBuku->peminjaman->book->judul,
                 'penulis' => $dendaBuku->peminjaman->book->penulis,
                 'penerbit' => $dendaBuku->peminjaman->book->penerbit,
@@ -104,6 +105,7 @@ class DendaController extends Controller
                 'tgl_peminjaman' => $dendaBuku->peminjaman->tgl_peminjaman,
                 'tgl_pengembalian' => $dendaBuku->peminjaman->tgl_pengembalian,
                 'jumlah_pinjam' => $dendaBuku->peminjaman->jumlah_pinjam,
+                'status_peminjaman' => $dendaBuku->peminjaman->status_peminjaman,
                 'tgl_pembayaran' => $dendaBuku->tgl_pembayaran,
                 'jumlah' => $dendaBuku->jumlah, // Total jumlah termasuk denda
                 'status_pembayaran' => $dendaBuku->status_pembayaran,
@@ -118,13 +120,34 @@ class DendaController extends Controller
 
     public function show($id)
     {
-        $denda = Denda::find($id);
+        $denda = Denda::with(['peminjaman', 'user'])->find($id);
 
         if (!$denda) {
             return response()->json(['success' => false, 'msg' => 'Denda tidak ditemukan'], 404);
         }
 
-        return response()->json(['success' => true, 'data' => $denda]);
+        $data = [
+            'id' => $denda->id,
+            'id_buku' => $denda->peminjaman->book->id,
+            'cover_buku' => $denda->peminjaman->book->cover_buku,
+            'judul_buku' => $denda->peminjaman->book->judul,
+            'penulis' => $denda->peminjaman->book->penulis,
+            'penerbit' => $denda->peminjaman->book->penerbit,
+            'tahun_terbit' => $denda->peminjaman->book->tahun_terbit,
+            'nama_user' => $denda->peminjaman->user->name,
+            'nisn_user' => $denda->peminjaman->user->nisn,
+            'tgl_peminjaman' => $denda->peminjaman->tgl_peminjaman,
+            'tgl_pengembalian' => $denda->peminjaman->tgl_pengembalian,
+            'jumlah_pinjam' => $denda->peminjaman->jumlah_pinjam,
+            'status_peminjaman' => $denda->peminjaman->status_peminjaman,
+            'tgl_pembayaran' => $denda->tgl_pembayaran,
+            'jumlah' => $denda->jumlah, // Total jumlah termasuk denda
+            'status_pembayaran' => $denda->status_pembayaran,
+            'created_at' => $denda->created_at,
+            'updated_at' => $denda->updated_at,
+        ];
+
+        return response()->json(['success' => true, 'data' => $data]);
     }
 
     public function store(Request $request)
