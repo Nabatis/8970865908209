@@ -13,7 +13,7 @@ use App\Http\Controllers\PinjamController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ResetPasswordController;
 use App\Http\Controllers\ReviewController;
-
+use App\Http\Controllers\RiwayatController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -66,6 +66,7 @@ Route::post('updateDurasiPeminjaman/{id}', [Durasipeminjaman::class, 'update']);
 Route::delete('deleteDurasiPeminjaman/{id}', [Durasipeminjaman::class, 'delete']);
 
 
+
 // dll
 Route::delete('deleteReviews/{id}', [ReviewController::class, 'destroy']);
 
@@ -93,6 +94,9 @@ Route::get('searchBuku', [BukuController::class, 'search']);
 Route::get('total-rating-all-book', [BukuController::class, 'getTotalRatingAllBook']);
 Route::post('submitBorrowingRequest', [BukuController::class, 'submitBorrowingRequest']);
 Route::post('submitPeminjaman', [BukuController::class, 'submitPeminjaman']);
+
+Route::get('getPeminjamanbyuser/{userId}', [RiwayatController::class, 'getPeminjamanbyuser']);
+
 
 
 Route::post('reviews', [ReviewController::class, 'store']);

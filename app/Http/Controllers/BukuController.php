@@ -19,10 +19,6 @@ use Illuminate\Support\Facades\Storage;
 class BukuController extends Controller
 {
 
-    
-
-
-
     public function getTotalRatingAllBook()
     {
         // Get all books
