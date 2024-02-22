@@ -15,15 +15,29 @@ class PinjamController extends Controller
 {
     public function pinjamBukuUser(Request $request)
     {
+        // Memeriksa apakah jumlah_pinjam telah diberikan dalam request, jika tidak, default nilainya menjadi 1
+        $request->merge(['jumlah_pinjam' => $request->input('jumlah_pinjam', 1)]);
+
         $validator = Validator::make($request->all(), [
             'id_buku' => 'required|exists:buku,id',
             'id_users' => 'required|exists:users,id',
             'id_durasi_peminjaman' => 'required|exists:durasi_peminjaman,id',
             'tgl_peminjaman' => 'required|date',
+            'jumlah_pinjam' => 'required|integer|min:1',
         ]);
 
         if ($validator->fails()) {
             return response()->json($validator->errors(), 400);
+        }
+
+        $buku = Buku::find($request->id_buku);
+
+        if (!$buku) {
+            return response()->json(['success' => false, 'msg' => 'Buku tidak ditemukan'], 404);
+        }
+
+        if ($request->jumlah_pinjam > $buku->stock) {
+            return response()->json(['success' => false, 'msg' => 'Stock kami sedang habis', 'stock_tersedia' => $buku->stock], 400);
         }
 
         $user = User::find($request->id_users);
@@ -38,16 +52,6 @@ class PinjamController extends Controller
 
         if ($existingPeminjaman >= 1) {
             return response()->json(['success' => false, 'msg' => 'Anda sudah meminjam buku dan belum mengembalikannya, kembalikan terlebih dahulu'], 400);
-        }
-
-        $buku = Buku::find($request->id_buku);
-
-        if (!$buku) {
-            return response()->json(['success' => false, 'msg' => 'Buku tidak ditemukan'], 404);
-        }
-
-        if ($request->jumlah_pinjam > $buku->stock) {
-            return response()->json(['success' => false, 'msg' => 'Jumlah buku yang diminta melebihi stok yang tersedia', 'stock_tersedia' => $buku->stock,], 400);
         }
 
         try {
@@ -66,11 +70,11 @@ class PinjamController extends Controller
                 'id_durasi_peminjaman' => $request->id_durasi_peminjaman,
                 'tgl_pengembalian' => $tgl_pengembalian,
                 'status_peminjaman' => 'tertunda',
-                'jumlah_pinjam' => 1,
+                'jumlah_pinjam' => $request->jumlah_pinjam,
             ]);
 
             if ($peminjaman->status_peminjaman === 'disetujui') {
-                $buku->decrement('stock');
+                $buku->decrement('stock', $request->jumlah_pinjam);
             }
 
             return response()->json([
