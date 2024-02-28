@@ -75,6 +75,7 @@ Route::delete('deleteUser/{id}', [DeviceController::class, 'deleteUser']);
 Route::get('getAllUser', [DeviceController::class, 'getAllUser']);
 
 // denda
+Route::get('indexDendaByUser/{userId}', [DendaController::class, 'indexDendaByUser']);
 Route::get('hitungDenda/{id_peminjaman}', [DendaController::class, 'hitungDenda']);
 Route::get('dataDenda', [DendaController::class, 'index']);
 Route::post('dataDenda', [DendaController::class, 'storeOrUpdate']);

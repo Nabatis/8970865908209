@@ -59,6 +59,58 @@ class DendaController extends Controller
         return response()->json(['success' => true, 'data' => $formattedDenda]);
     }
 
+    public function indexDendaByUser($userId)
+    {
+
+        $denda = Denda::with(['peminjaman', 'user'])
+            ->whereHas('user', function ($query) use ($userId) {
+                $query->where('id', $userId);
+            })
+            ->get();
+
+
+        if ($denda->isEmpty()) {
+            return response()->json(['success' => true, 'false' => 'Tidak ada data denda'], 404);
+        }
+
+        // Ubah data yang diperoleh menjadi format yang sesuai sebelum mengirimkan respons
+        $formattedDenda = $denda->map(function ($dendaBuku) {
+            // Hitung selisih hari
+            $tglPengembalian = Carbon::parse($dendaBuku->peminjaman->tgl_pengembalian);
+            $tglPembayaran = $dendaBuku->tgl_pembayaran ? Carbon::parse($dendaBuku->tgl_pembayaran) : Carbon::now();
+            $selisihHari = $tglPengembalian->diffInDays($tglPembayaran);
+
+            // Jika belum membayar dan terlambat, tambahkan denda per hari
+            if ($selisihHari > 0 && $dendaBuku->status_pembayaran === 'belum_dibayar') {
+                $dendaPerHari = 1000; // Denda per hari
+                $totalDenda = $selisihHari * $dendaPerHari;
+                // Jika selisih hari lebih dari jumlah hari denda yang telah ditambahkan sebelumnya
+                if ($selisihHari > $dendaBuku->jumlah_hari_denda) {
+                    $dendaBuku->jumlah += $dendaPerHari; // Tambahkan denda
+                    $dendaBuku->jumlah_hari_denda = $selisihHari; // Update jumlah hari denda
+                    $dendaBuku->save();
+                }
+            }
+
+            return [
+                'id' => $dendaBuku->id,
+                'judul_buku' => $dendaBuku->peminjaman->book->judul,
+                'nama_user' => $dendaBuku->peminjaman->user->name,
+                'nisn_user' => $dendaBuku->peminjaman->user->nisn,
+                'tgl_peminjaman' => $dendaBuku->peminjaman->tgl_peminjaman,
+                'tgl_pengembalian' => $dendaBuku->peminjaman->tgl_pengembalian,
+                'jumlah_pinjam' => $dendaBuku->peminjaman->jumlah_pinjam,
+                'tgl_pembayaran' => $dendaBuku->tgl_pembayaran,
+                'jumlah' => $dendaBuku->jumlah, // Total jumlah termasuk denda
+                'status_pembayaran' => $dendaBuku->status_pembayaran,
+                'created_at' => $dendaBuku->created_at,
+                'updated_at' => $dendaBuku->updated_at,
+            ];
+        });
+
+        return response()->json(['success' => true, 'data' => $formattedDenda]);
+    }
+
 
     public function show($id)
     {

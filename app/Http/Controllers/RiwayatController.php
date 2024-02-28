@@ -23,11 +23,13 @@ class RiwayatController extends Controller
         $formattedPeminjaman = $pinjam->map(function ($peminjaman) {
             return [
                 'id' => $peminjaman->id,
+                'id_buku' => $peminjaman->book->id,
                 'judul_buku' => $peminjaman->book->judul,
                 'cover_buku' => $peminjaman->book->cover_buku,
                 'deskripsi' => $peminjaman->book->deskripsi,
-                'nama_user' => $peminjaman->user->name,
-                'nisn_user' => $peminjaman->user->nisn,
+                'id_users' => $peminjaman->user->id,
+                'name' => $peminjaman->user->name,
+                'nisn' => $peminjaman->user->nisn,
                 'tgl_peminjaman' => $peminjaman->tgl_peminjaman,
                 'tgl_pengembalian' => $peminjaman->tgl_pengembalian,
                 'jumlah_pinjam' => $peminjaman->jumlah_pinjam,
