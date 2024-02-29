@@ -8,6 +8,7 @@ use App\Http\Controllers\BukuController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\DendaController;
 use App\Http\Controllers\Durasipeminjaman;
+use App\Http\Controllers\MidtransController;
 use App\Http\Controllers\PeminjamanController;
 use App\Http\Controllers\PinjamController;
 use App\Http\Controllers\ProfileController;
@@ -65,6 +66,9 @@ Route::post('storeDurasiPeminjaman', [Durasipeminjaman::class, 'store']);
 Route::post('updateDurasiPeminjaman/{id}', [Durasipeminjaman::class, 'update']);
 Route::delete('deleteDurasiPeminjaman/{id}', [Durasipeminjaman::class, 'delete']);
 
+Route::get('gettotaldataadmin', [RiwayatController::class, 'gettotaldataadmin']);
+
+
 
 
 // dll
@@ -112,3 +116,5 @@ Route::get('getBookmark/{userId}', [BookmarkController::class, 'getBookmark']);
 
 Route::get('dataKategori/{id}', [KategoriController::class, 'show']);
 Route::get('dataKategori', [KategoriController::class, 'index']);
+
+Route::post('/start-payment', [MidtransController::class, 'startPayment']);

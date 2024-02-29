@@ -42,7 +42,7 @@ class DendaController extends Controller
 
             return [
                 'id' => $dendaBuku->id,
-                'judul_buku' => $dendaBuku->peminjaman->bok->judul,
+                'judul_buku' => $dendaBuku->peminjaman->book->judul,
                 'nama_user' => $dendaBuku->peminjaman->user->name,
                 'nisn_user' => $dendaBuku->peminjaman->user->nisn,
                 'tgl_peminjaman' => $dendaBuku->peminjaman->tgl_peminjaman,
