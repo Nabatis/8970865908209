@@ -34,4 +34,21 @@ class PeminjamanController extends Controller
 
         return response()->json(['success' => true, 'data' => $formattedPeminjaman]);
     }
+
+    public function getJumlahPeminjamanByMonth($month)
+    {
+        $monthNumber = date('m', strtotime($month)); // Mengubah nama bulan menjadi angka bulan
+
+        $query = Peminjaman::query();
+
+        if ($monthNumber) {
+            $query->whereMonth('tgl_peminjaman', $monthNumber);
+        }
+
+        $totalPinjam = $query->count();
+
+        return response()->json([
+            'total_peminjaman' => $totalPinjam,
+        ]);
+    }
 }

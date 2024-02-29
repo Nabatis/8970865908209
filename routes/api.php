@@ -65,6 +65,7 @@ Route::get('getDurasiPeminjaman/{id}', [Durasipeminjaman::class, 'show']);
 Route::post('storeDurasiPeminjaman', [Durasipeminjaman::class, 'store']);
 Route::post('updateDurasiPeminjaman/{id}', [Durasipeminjaman::class, 'update']);
 Route::delete('deleteDurasiPeminjaman/{id}', [Durasipeminjaman::class, 'delete']);
+Route::get('jumlah-peminjaman/{month}', [PeminjamanController::class, 'getJumlahPeminjamanByMonth']);
 
 Route::get('gettotaldataadmin', [RiwayatController::class, 'gettotaldataadmin']);
 
