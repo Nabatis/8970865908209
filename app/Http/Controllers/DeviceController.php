@@ -35,7 +35,7 @@ class DeviceController extends Controller
 
     public function getAllUser()
     {
-        $user = User::all();
+        $user = User::where('role', 'user')->get();
 
         return response()->json([
             'success' => true,
