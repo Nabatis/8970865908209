@@ -7,6 +7,7 @@ use App\Models\Peminjaman;
 use App\Models\Buku;
 use App\Models\Denda;
 use App\Models\Kategori;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class RiwayatController extends Controller
@@ -48,15 +49,17 @@ class RiwayatController extends Controller
     public function gettotaldataadmin()
     {
         $totalBuku = Buku::count();
-        $totalPinjam = Peminjaman::count();
+        $totalUser = User::where('role', 'user')->count();
         $totalDenda = Denda::count();
         $totalKategori = Kategori::count();
 
         return response()->json([
             'total_buku' => $totalBuku,
             'total_denda' => $totalDenda,
-            'total_peminjaman' => $totalPinjam,
+            'total_user' => $totalUser,
             'total_Kategori' => $totalKategori,
         ]);
     }
+
+    
 }

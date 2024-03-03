@@ -35,20 +35,46 @@ class PeminjamanController extends Controller
         return response()->json(['success' => true, 'data' => $formattedPeminjaman]);
     }
 
-    public function getJumlahPeminjamanByMonth($month)
+    public function getJumlahPeminjamanByYearAndMonth(Request $request)
     {
-        $monthNumber = date('m', strtotime($month)); // Mengubah nama bulan menjadi angka bulan
+        $currentYear = date('Y'); // Mendapatkan tahun saat ini
 
-        $query = Peminjaman::query();
+        $monthlyStats = [];
 
-        if ($monthNumber) {
-            $query->whereMonth('tgl_peminjaman', $monthNumber);
+        // Loop untuk setiap bulan dalam satu tahun
+        for ($month = 1; $month <= 12; $month++) {
+            $monthName = date('F', mktime(0, 0, 0, $month, 1)); // Nama bulan
+            $monthNumber = str_pad($month, 2, '0', STR_PAD_LEFT); // Angka bulan
+
+            // Menghitung jumlah peminjaman untuk bulan dan tahun saat ini
+            $totalPinjam = Peminjaman::whereYear('tgl_peminjaman', $currentYear)
+                ->whereMonth('tgl_peminjaman', $monthNumber)
+                ->count();
+
+            // Menambahkan data bulan ke dalam array statistik bulanan
+            $monthlyStats[$monthName] = $totalPinjam;
         }
 
-        $totalPinjam = $query->count();
+        // Membuat respons JSON
+        $response = [
+            'tahun' => $currentYear,
+            'statistik_peminjaman' => $monthlyStats,
+        ];
 
-        return response()->json([
-            'total_peminjaman' => $totalPinjam,
-        ]);
+        return response()->json($response);
+    }
+
+    public function getPeminjamanstatustertunda()
+    {
+        $pinjam = Peminjaman::with(['book', 'user'])
+            ->where('status_peminjaman', '=', 'tertunda')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        if ($pinjam->isEmpty()) {
+            return response()->json(['success' => true, 'false' => 'Tidak ada data denda'], 404);
+        }
+
+        return response()->json(['success' => true, 'data' => $pinjam]);
     }
 }
